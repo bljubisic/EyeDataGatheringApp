@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,14 @@
 		E44A424223EEAB1600512521 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E44A424023EEAB1600512521 /* LaunchScreen.storyboard */; };
 		E44A424D23EEAB1600512521 /* EyeDataGatheringAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A424C23EEAB1600512521 /* EyeDataGatheringAppTests.swift */; };
 		E44A425823EEAB1600512521 /* EyeDataGatheringAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A425723EEAB1600512521 /* EyeDataGatheringAppUITests.swift */; };
+		E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */; };
+		E4AED5F723EF686200E89A19 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5F623EF686200E89A19 /* SnapKit */; };
+		E4AED5FA23EF689600E89A19 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5F923EF689600E89A19 /* RxSwift */; };
+		E4AED5FC23EF689600E89A19 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5FB23EF689600E89A19 /* RxTest */; };
+		E4AED5FE23EF689600E89A19 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5FD23EF689600E89A19 /* RxRelay */; };
+		E4AED60023EF689600E89A19 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5FF23EF689600E89A19 /* RxCocoa */; };
+		E4AED60223EF689600E89A19 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED60123EF689600E89A19 /* RxBlocking */; };
+		E4AED60423EF696300E89A19 /* IDataGatheringModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +57,8 @@
 		E44A425323EEAB1600512521 /* EyeDataGatheringAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EyeDataGatheringAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E44A425723EEAB1600512521 /* EyeDataGatheringAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeDataGatheringAppUITests.swift; sourceTree = "<group>"; };
 		E44A425923EEAB1600512521 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringStructures.swift; sourceTree = "<group>"; };
+		E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDataGatheringModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +66,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4AED5FA23EF689600E89A19 /* RxSwift in Frameworks */,
+				E4AED60223EF689600E89A19 /* RxBlocking in Frameworks */,
+				E4AED5FC23EF689600E89A19 /* RxTest in Frameworks */,
+				E4AED60023EF689600E89A19 /* RxCocoa in Frameworks */,
+				E4AED5FE23EF689600E89A19 /* RxRelay in Frameworks */,
+				E4AED5F723EF686200E89A19 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +115,9 @@
 		E44A423423EEAB1500512521 /* EyeDataGatheringApp */ = {
 			isa = PBXGroup;
 			children = (
+				E44A426723EEAE2400512521 /* Model */,
+				E44A426623EEAE1D00512521 /* ViewModel */,
+				E44A426523EEAE1000512521 /* View */,
 				E44A423523EEAB1500512521 /* AppDelegate.swift */,
 				E44A423723EEAB1500512521 /* SceneDelegate.swift */,
 				E44A423923EEAB1500512521 /* ViewController.swift */,
@@ -128,6 +147,29 @@
 			path = EyeDataGatheringAppUITests;
 			sourceTree = "<group>";
 		};
+		E44A426523EEAE1000512521 /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		E44A426623EEAE1D00512521 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		E44A426723EEAE2400512521 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */,
+				E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -144,6 +186,14 @@
 			dependencies = (
 			);
 			name = EyeDataGatheringApp;
+			packageProductDependencies = (
+				E4AED5F623EF686200E89A19 /* SnapKit */,
+				E4AED5F923EF689600E89A19 /* RxSwift */,
+				E4AED5FB23EF689600E89A19 /* RxTest */,
+				E4AED5FD23EF689600E89A19 /* RxRelay */,
+				E4AED5FF23EF689600E89A19 /* RxCocoa */,
+				E4AED60123EF689600E89A19 /* RxBlocking */,
+			);
 			productName = EyeDataGatheringApp;
 			productReference = E44A423223EEAB1500512521 /* EyeDataGatheringApp.app */;
 			productType = "com.apple.product-type.application";
@@ -216,6 +266,10 @@
 				Base,
 			);
 			mainGroup = E44A422923EEAB1500512521;
+			packageReferences = (
+				E4AED5F523EF686100E89A19 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */,
+			);
 			productRefGroup = E44A423323EEAB1500512521 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -262,6 +316,8 @@
 				E44A423A23EEAB1500512521 /* ViewController.swift in Sources */,
 				E44A423623EEAB1500512521 /* AppDelegate.swift in Sources */,
 				E44A423823EEAB1500512521 /* SceneDelegate.swift in Sources */,
+				E4AED60423EF696300E89A19 /* IDataGatheringModel.swift in Sources */,
+				E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -590,6 +646,58 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E4AED5F523EF686100E89A19 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
+		E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E4AED5F623EF686200E89A19 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F523EF686100E89A19 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		E4AED5F923EF689600E89A19 /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		E4AED5FB23EF689600E89A19 /* RxTest */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxTest;
+		};
+		E4AED5FD23EF689600E89A19 /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
+		};
+		E4AED5FF23EF689600E89A19 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		E4AED60123EF689600E89A19 /* RxBlocking */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4AED5F823EF689600E89A19 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxBlocking;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E44A422A23EEAB1500512521 /* Project object */;
 }
