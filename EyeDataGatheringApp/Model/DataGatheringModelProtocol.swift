@@ -15,3 +15,8 @@ protocol DataGatheringInputs {
 protocol DataGatheringOutputs {
     
 }
+
+
+protocol DataGatheringModelProtocol {
+    
+}

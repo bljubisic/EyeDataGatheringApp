@@ -22,7 +22,7 @@
 		E4AED5FE23EF689600E89A19 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5FD23EF689600E89A19 /* RxRelay */; };
 		E4AED60023EF689600E89A19 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5FF23EF689600E89A19 /* RxCocoa */; };
 		E4AED60223EF689600E89A19 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED60123EF689600E89A19 /* RxBlocking */; };
-		E4AED60423EF696300E89A19 /* IDataGatheringModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */; };
+		E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +58,7 @@
 		E44A425723EEAB1600512521 /* EyeDataGatheringAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeDataGatheringAppUITests.swift; sourceTree = "<group>"; };
 		E44A425923EEAB1600512521 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringStructures.swift; sourceTree = "<group>"; };
-		E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDataGatheringModel.swift; sourceTree = "<group>"; };
+		E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringModelProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,7 +165,7 @@
 			isa = PBXGroup;
 			children = (
 				E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */,
-				E4AED60323EF696300E89A19 /* IDataGatheringModel.swift */,
+				E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -316,7 +316,7 @@
 				E44A423A23EEAB1500512521 /* ViewController.swift in Sources */,
 				E44A423623EEAB1500512521 /* AppDelegate.swift in Sources */,
 				E44A423823EEAB1500512521 /* SceneDelegate.swift in Sources */,
-				E4AED60423EF696300E89A19 /* IDataGatheringModel.swift in Sources */,
+				E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */,
 				E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
