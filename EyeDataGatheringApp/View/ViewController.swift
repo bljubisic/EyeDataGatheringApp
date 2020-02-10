@@ -40,6 +40,8 @@ class ViewController: UIViewController {
     
     private var setupResult: SessionSetupResult = .success
     
+    private var viewModel: RecordingViewModelProtocol!
+    
     let timerSubject = Observable<Int>.interval(.milliseconds(1), scheduler: MainScheduler.instance).debug().publish()
     
     var labelUpdateSubscription: Disposable!
@@ -53,36 +55,31 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        let model = DataGatheringModel()
+//        self.viewModel = RecordingViewModel(with: model)
+
         connection = nil
         
         labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
             print(value)
         })
         
-        firstFlashStop = self.timerSubject
-        .filter { (value) -> Bool in
-            return value == 3000
-        }
-        .subscribe(onNext: { value in
-            self.startFlash()
-        })
-        
-        secondFlashStart = self.timerSubject
-            .filter({ value -> Bool in
-                return value == 6000
-            })
-            .subscribe(onNext: { value in
+        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 3000)
+            .subscribe(onNext: { _ in
                 self.startFlash()
             })
-        secondFlashStop = self.timerSubject
-            .filter({ value -> Bool in
-                return value == 6250
+        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 6000)
+            .subscribe(onNext: { _ in
+                self.startFlash()
             })
-            .subscribe(onNext:{ value in
+        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 6250)
+            .subscribe(onNext: { _ in
                 self.startFlash()
                 self.stopRecording()
             })
+
         preview = PreviewView()
+        preview.backgroundColor = UIColor.red
         self.view.addSubview(preview)
         preview.snp.makeConstraints { (make) in
             make.edges.equalTo(self.view)
@@ -142,7 +139,7 @@ class ViewController: UIViewController {
     
     func startRecording() {
         print("start recording")
-        self.connection = self.timerSubject.connect()
+        self.connection = self.viewModel.inputs.connectToTimer()
     }
     
     func stopRecording() {
@@ -280,6 +277,10 @@ class ViewController: UIViewController {
         }
         
         session.commitConfiguration()
+    }
+    
+    func insert(viewModel: RecordingViewModelProtocol) {
+        self.viewModel = viewModel
     }
 
 }

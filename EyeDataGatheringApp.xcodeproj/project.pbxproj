@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		E44A423623EEAB1500512521 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A423523EEAB1500512521 /* AppDelegate.swift */; };
-		E44A423823EEAB1500512521 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A423723EEAB1500512521 /* SceneDelegate.swift */; };
 		E44A423A23EEAB1500512521 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A423923EEAB1500512521 /* ViewController.swift */; };
 		E44A423D23EEAB1500512521 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E44A423B23EEAB1500512521 /* Main.storyboard */; };
 		E44A423F23EEAB1600512521 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E44A423E23EEAB1600512521 /* Assets.xcassets */; };
@@ -27,7 +26,6 @@
 /* Begin PBXFileReference section */
 		E44A423223EEAB1500512521 /* EyeDataGatheringApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EyeDataGatheringApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E44A423523EEAB1500512521 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		E44A423723EEAB1500512521 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		E44A423923EEAB1500512521 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		E44A423C23EEAB1500512521 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		E44A423E23EEAB1600512521 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -80,7 +78,6 @@
 				E44A426623EEAE1D00512521 /* ViewModel */,
 				E44A426523EEAE1000512521 /* View */,
 				E44A423523EEAB1500512521 /* AppDelegate.swift */,
-				E44A423723EEAB1500512521 /* SceneDelegate.swift */,
 				E44A423B23EEAB1500512521 /* Main.storyboard */,
 				E44A423E23EEAB1600512521 /* Assets.xcassets */,
 				E44A424023EEAB1600512521 /* LaunchScreen.storyboard */,
@@ -208,7 +205,6 @@
 				E44A423A23EEAB1500512521 /* ViewController.swift in Sources */,
 				E46E6E5B23F1B73600D26E00 /* RecordingViewModel.swift in Sources */,
 				E44A423623EEAB1500512521 /* AppDelegate.swift in Sources */,
-				E44A423823EEAB1500512521 /* SceneDelegate.swift in Sources */,
 				E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */,
 				E46E6E5723F1A47400D26E00 /* RecordingViewModelProtocol.swift in Sources */,
 				E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */,
@@ -242,6 +238,7 @@
 		E44A425A23EEAB1600512521 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -302,6 +299,7 @@
 		E44A425B23EEAB1600512521 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -356,6 +354,7 @@
 		E44A425D23EEAB1600512521 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ENT89NLKC9;
@@ -367,13 +366,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.persukibo.EyeDataGatheringApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		E44A425E23EEAB1600512521 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ENT89NLKC9;
@@ -385,7 +385,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.persukibo.EyeDataGatheringApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
