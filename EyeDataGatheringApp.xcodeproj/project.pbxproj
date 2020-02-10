@@ -14,6 +14,9 @@
 		E44A423F23EEAB1600512521 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E44A423E23EEAB1600512521 /* Assets.xcassets */; };
 		E44A424223EEAB1600512521 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E44A424023EEAB1600512521 /* LaunchScreen.storyboard */; };
 		E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */; };
+		E46E6E5723F1A47400D26E00 /* RecordingViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5623F1A47400D26E00 /* RecordingViewModelProtocol.swift */; };
+		E46E6E5923F1B42B00D26E00 /* DataGatheringModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5823F1B42B00D26E00 /* DataGatheringModel.swift */; };
+		E46E6E5B23F1B73600D26E00 /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5A23F1B73600D26E00 /* RecordingViewModel.swift */; };
 		E4AED5F723EF686200E89A19 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5F623EF686200E89A19 /* SnapKit */; };
 		E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */; };
 		E4F7049723F029C3005CBFAD /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = E4F7049623F029C3005CBFAD /* RxSwift */; };
@@ -31,6 +34,9 @@
 		E44A424123EEAB1600512521 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E44A424323EEAB1600512521 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringStructures.swift; sourceTree = "<group>"; };
+		E46E6E5623F1A47400D26E00 /* RecordingViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModelProtocol.swift; sourceTree = "<group>"; };
+		E46E6E5823F1B42B00D26E00 /* DataGatheringModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringModel.swift; sourceTree = "<group>"; };
+		E46E6E5A23F1B73600D26E00 /* RecordingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModel.swift; sourceTree = "<group>"; };
 		E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringModelProtocol.swift; sourceTree = "<group>"; };
 		E4AED60623F0218A00E89A19 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		E4F7049A23F0313D005CBFAD /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
@@ -95,6 +101,8 @@
 		E44A426623EEAE1D00512521 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				E46E6E5623F1A47400D26E00 /* RecordingViewModelProtocol.swift */,
+				E46E6E5A23F1B73600D26E00 /* RecordingViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -104,6 +112,7 @@
 			children = (
 				E44A426823EEAE4F00512521 /* DataGatheringStructures.swift */,
 				E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */,
+				E46E6E5823F1B42B00D26E00 /* DataGatheringModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -197,11 +206,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				E44A423A23EEAB1500512521 /* ViewController.swift in Sources */,
+				E46E6E5B23F1B73600D26E00 /* RecordingViewModel.swift in Sources */,
 				E44A423623EEAB1500512521 /* AppDelegate.swift in Sources */,
 				E44A423823EEAB1500512521 /* SceneDelegate.swift in Sources */,
 				E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */,
+				E46E6E5723F1A47400D26E00 /* RecordingViewModelProtocol.swift in Sources */,
 				E44A426923EEAE4F00512521 /* DataGatheringStructures.swift in Sources */,
 				E4F7049B23F0313D005CBFAD /* PreviewView.swift in Sources */,
+				E46E6E5923F1B42B00D26E00 /* DataGatheringModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

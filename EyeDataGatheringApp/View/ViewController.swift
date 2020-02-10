@@ -39,10 +39,49 @@ class ViewController: UIViewController {
     private let sessionQueue = DispatchQueue(label: "session queue")
     
     private var setupResult: SessionSetupResult = .success
+    
+    let timerSubject = Observable<Int>.interval(.milliseconds(1), scheduler: MainScheduler.instance).debug().publish()
+    
+    var labelUpdateSubscription: Disposable!
+    
+    var firstFlashStop: Disposable!
+    var secondFlashStart: Disposable!
+    var secondFlashStop: Disposable!
+    
+    var connection: Disposable?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-                
+        
+        connection = nil
+        
+        labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
+            print(value)
+        })
+        
+        firstFlashStop = self.timerSubject
+        .filter { (value) -> Bool in
+            return value == 3000
+        }
+        .subscribe(onNext: { value in
+            self.startFlash()
+        })
+        
+        secondFlashStart = self.timerSubject
+            .filter({ value -> Bool in
+                return value == 6000
+            })
+            .subscribe(onNext: { value in
+                self.startFlash()
+            })
+        secondFlashStop = self.timerSubject
+            .filter({ value -> Bool in
+                return value == 6250
+            })
+            .subscribe(onNext:{ value in
+                self.startFlash()
+                self.stopRecording()
+            })
         preview = PreviewView()
         self.view.addSubview(preview)
         preview.snp.makeConstraints { (make) in
@@ -62,6 +101,7 @@ class ViewController: UIViewController {
             .debug()
             .subscribe(onNext: { _ in
                 self.startFlash()
+                self.startRecording()
             })
             .disposed(by: disposeBag)
         
@@ -83,9 +123,8 @@ class ViewController: UIViewController {
              }
 
              // check if your torchMode is on or off. If on turns it off otherwise turns it on
-             if avDevice.isTorchActive {
+            if avDevice.isTorchActive {
                 avDevice.torchMode = AVCaptureDevice.TorchMode.off
-                self.capture.setImage(UIImage(named: "Capture"), for: .normal)
              } else {
                  // sets the torch intensity to 100%
                  do {
@@ -100,6 +139,21 @@ class ViewController: UIViewController {
              avDevice.unlockForConfiguration()
          }
     }
+    
+    func startRecording() {
+        print("start recording")
+        self.connection = self.timerSubject.connect()
+    }
+    
+    func stopRecording() {
+        self.labelUpdateSubscription?.dispose()
+        self.firstFlashStop?.dispose()
+        self.secondFlashStart?.dispose()
+        self.secondFlashStop?.dispose()
+        self.connection?.dispose()
+        self.capture.setImage(UIImage(named: "Capture"), for: .normal)
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
