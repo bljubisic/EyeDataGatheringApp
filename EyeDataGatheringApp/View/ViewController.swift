@@ -29,6 +29,7 @@ class ViewController: UIViewController {
     var capture: UIButton!
     var timeLapsed: UILabel!
     var frameView: UIView!
+    var flash: UIImageView!
     
     let session = AVCaptureSession()
     private var isSessionRunning = false
@@ -110,6 +111,14 @@ class ViewController: UIViewController {
         self.frameView.backgroundColor = UIColor.clear
         self.frameView.layer.borderColor = UIColor.green.cgColor
         self.frameView.layer.borderWidth = 2.0
+        
+        self.flash = UIImageView()
+        self.view.addSubview(flash)
+        flash.snp.makeConstraints { make in
+            make.left.equalTo(self.view).inset(20)
+            make.top.equalTo(self.view).inset(10)
+        }
+        self.flash.image = UIImage(named: "flash_off")
         self.initiateSubscriptions()
         sessionQueue.async {
             self.configureSession()
@@ -131,14 +140,15 @@ class ViewController: UIViewController {
              // check if your torchMode is on or off. If on turns it off otherwise turns it on
             if avDevice.isTorchActive {
                 avDevice.torchMode = AVCaptureDevice.TorchMode.off
+                self.flash.image = UIImage(named: "flash_off")
              } else {
-                 // sets the torch intensity to 100%
-                 do {
+                // sets the torch intensity to 100%
+                do {
                     _ = try avDevice.setTorchModeOn(level: 1.0)
-                 } catch {
-                     print("error")
-                 }
-             //    avDevice.setTorchModeOnWithLevel(1.0, error: nil)
+                } catch {
+                    print("error")
+                }
+                self.flash.image = UIImage(named: "flash_on")
              }
              // unlock your device
              avDevice.unlockForConfiguration()
