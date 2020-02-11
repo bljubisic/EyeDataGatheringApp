@@ -16,12 +16,23 @@
 		E46E6E5723F1A47400D26E00 /* RecordingViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5623F1A47400D26E00 /* RecordingViewModelProtocol.swift */; };
 		E46E6E5923F1B42B00D26E00 /* DataGatheringModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5823F1B42B00D26E00 /* DataGatheringModel.swift */; };
 		E46E6E5B23F1B73600D26E00 /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E5A23F1B73600D26E00 /* RecordingViewModel.swift */; };
+		E46E6E6323F2A7D200D26E00 /* EyeDataGatheringAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46E6E6223F2A7D200D26E00 /* EyeDataGatheringAppTests.swift */; };
 		E4AED5F723EF686200E89A19 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4AED5F623EF686200E89A19 /* SnapKit */; };
 		E4AED60423EF696300E89A19 /* DataGatheringModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */; };
 		E4F7049723F029C3005CBFAD /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = E4F7049623F029C3005CBFAD /* RxSwift */; };
 		E4F7049923F029C3005CBFAD /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = E4F7049823F029C3005CBFAD /* RxCocoa */; };
 		E4F7049B23F0313D005CBFAD /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F7049A23F0313D005CBFAD /* PreviewView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E46E6E6523F2A7D200D26E00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E44A422A23EEAB1500512521 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E44A423123EEAB1500512521;
+			remoteInfo = EyeDataGatheringApp;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		E44A423223EEAB1500512521 /* EyeDataGatheringApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EyeDataGatheringApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,6 +46,9 @@
 		E46E6E5623F1A47400D26E00 /* RecordingViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModelProtocol.swift; sourceTree = "<group>"; };
 		E46E6E5823F1B42B00D26E00 /* DataGatheringModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringModel.swift; sourceTree = "<group>"; };
 		E46E6E5A23F1B73600D26E00 /* RecordingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModel.swift; sourceTree = "<group>"; };
+		E46E6E6023F2A7D200D26E00 /* EyeDataGatheringAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EyeDataGatheringAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E46E6E6223F2A7D200D26E00 /* EyeDataGatheringAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeDataGatheringAppTests.swift; sourceTree = "<group>"; };
+		E46E6E6423F2A7D200D26E00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E4AED60323EF696300E89A19 /* DataGatheringModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGatheringModelProtocol.swift; sourceTree = "<group>"; };
 		E4AED60623F0218A00E89A19 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		E4F7049A23F0313D005CBFAD /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
@@ -51,6 +65,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E46E6E5D23F2A7D200D26E00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -58,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				E44A423423EEAB1500512521 /* EyeDataGatheringApp */,
+				E46E6E6123F2A7D200D26E00 /* EyeDataGatheringAppTests */,
 				E44A423323EEAB1500512521 /* Products */,
 				E4AED60523F0218A00E89A19 /* Frameworks */,
 			);
@@ -67,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				E44A423223EEAB1500512521 /* EyeDataGatheringApp.app */,
+				E46E6E6023F2A7D200D26E00 /* EyeDataGatheringAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,6 +137,15 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		E46E6E6123F2A7D200D26E00 /* EyeDataGatheringAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				E46E6E6223F2A7D200D26E00 /* EyeDataGatheringAppTests.swift */,
+				E46E6E6423F2A7D200D26E00 /* Info.plist */,
+			);
+			path = EyeDataGatheringAppTests;
+			sourceTree = "<group>";
+		};
 		E4AED60523F0218A00E89A19 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -147,6 +179,24 @@
 			productReference = E44A423223EEAB1500512521 /* EyeDataGatheringApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E46E6E5F23F2A7D200D26E00 /* EyeDataGatheringAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E46E6E6723F2A7D200D26E00 /* Build configuration list for PBXNativeTarget "EyeDataGatheringAppTests" */;
+			buildPhases = (
+				E46E6E5C23F2A7D200D26E00 /* Sources */,
+				E46E6E5D23F2A7D200D26E00 /* Frameworks */,
+				E46E6E5E23F2A7D200D26E00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E46E6E6623F2A7D200D26E00 /* PBXTargetDependency */,
+			);
+			name = EyeDataGatheringAppTests;
+			productName = EyeDataGatheringAppTests;
+			productReference = E46E6E6023F2A7D200D26E00 /* EyeDataGatheringAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -159,6 +209,10 @@
 				TargetAttributes = {
 					E44A423123EEAB1500512521 = {
 						CreatedOnToolsVersion = 11.3.1;
+					};
+					E46E6E5F23F2A7D200D26E00 = {
+						CreatedOnToolsVersion = 11.3.1;
+						TestTargetID = E44A423123EEAB1500512521;
 					};
 				};
 			};
@@ -180,6 +234,7 @@
 			projectRoot = "";
 			targets = (
 				E44A423123EEAB1500512521 /* EyeDataGatheringApp */,
+				E46E6E5F23F2A7D200D26E00 /* EyeDataGatheringAppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -192,6 +247,13 @@
 				E44A424223EEAB1600512521 /* LaunchScreen.storyboard in Resources */,
 				E44A423F23EEAB1600512521 /* Assets.xcassets in Resources */,
 				E44A423D23EEAB1500512521 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E46E6E5E23F2A7D200D26E00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,7 +275,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E46E6E5C23F2A7D200D26E00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E46E6E6323F2A7D200D26E00 /* EyeDataGatheringAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E46E6E6623F2A7D200D26E00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E44A423123EEAB1500512521 /* EyeDataGatheringApp */;
+			targetProxy = E46E6E6523F2A7D200D26E00 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E44A423B23EEAB1500512521 /* Main.storyboard */ = {
@@ -389,6 +467,46 @@
 			};
 			name = Release;
 		};
+		E46E6E6823F2A7D200D26E00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ENT89NLKC9;
+				INFOPLIST_FILE = EyeDataGatheringAppTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.persukibo.EyeDataGatheringAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EyeDataGatheringApp.app/EyeDataGatheringApp";
+			};
+			name = Debug;
+		};
+		E46E6E6923F2A7D200D26E00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ENT89NLKC9;
+				INFOPLIST_FILE = EyeDataGatheringAppTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.persukibo.EyeDataGatheringAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EyeDataGatheringApp.app/EyeDataGatheringApp";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -406,6 +524,15 @@
 			buildConfigurations = (
 				E44A425D23EEAB1600512521 /* Debug */,
 				E44A425E23EEAB1600512521 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E46E6E6723F2A7D200D26E00 /* Build configuration list for PBXNativeTarget "EyeDataGatheringAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E46E6E6823F2A7D200D26E00 /* Debug */,
+				E46E6E6923F2A7D200D26E00 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

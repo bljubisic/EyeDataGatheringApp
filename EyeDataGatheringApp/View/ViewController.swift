@@ -14,6 +14,7 @@ import AVFoundation
 
 class ViewController: UIViewController {
     
+    
     private enum SessionSetupResult {
         case success
         case notAuthorized
@@ -26,9 +27,12 @@ class ViewController: UIViewController {
     
     var preview: PreviewView!
     var capture: UIButton!
+    var timeLapsed: UILabel!
+    var frameView: UIView!
+    
     let session = AVCaptureSession()
     private var isSessionRunning = false
-    let movieOutput = AVCaptureMovieFileOutput()
+    var movieOutput = AVCaptureMovieFileOutput()
     var previewLayer: AVCaptureVideoPreviewLayer!
     var activeInput: AVCaptureDeviceInput!
     
@@ -37,6 +41,7 @@ class ViewController: UIViewController {
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     
     private let sessionQueue = DispatchQueue(label: "session queue")
+    private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
     private var setupResult: SessionSetupResult = .success
     
@@ -46,6 +51,7 @@ class ViewController: UIViewController {
     
     var labelUpdateSubscription: Disposable!
     
+    var firstFlashStart: Disposable!
     var firstFlashStop: Disposable!
     var secondFlashStart: Disposable!
     var secondFlashStop: Disposable!
@@ -58,26 +64,6 @@ class ViewController: UIViewController {
 //        let model = DataGatheringModel()
 //        self.viewModel = RecordingViewModel(with: model)
 
-        connection = nil
-        
-        labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
-            print(value)
-        })
-        
-        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 3000)
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 6000)
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 6250)
-            .subscribe(onNext: { _ in
-                self.startFlash()
-                self.stopRecording()
-            })
-
         preview = PreviewView()
         preview.backgroundColor = UIColor.red
         self.view.addSubview(preview)
@@ -88,20 +74,43 @@ class ViewController: UIViewController {
         
         capture = UIButton()
         capture.setImage(UIImage(named: "Capture"), for: .normal)
-        
         self.view.addSubview(capture)
         capture.snp.makeConstraints { (make) in
             make.centerX.equalTo(self.view.snp.centerX)
-            make.bottom.equalTo(self.view).inset(35)
+            make.bottom.equalTo(self.view).inset(0)
+            make.height.equalTo(75)
+            make.width.equalTo(75)
         }
+        
+        timeLapsed = UILabel()
+        self.view.addSubview(timeLapsed)
+        timeLapsed.snp.makeConstraints {make in
+            make.centerX.equalTo(self.view.snp.centerX)
+            make.top.equalTo(self.view).inset(10)
+            make.height.lessThanOrEqualTo(30)
+//            make.height.equalTo(25)
+        }
+        self.timeLapsed.text = "Starting recording"
         self.capture.rx.tap
             .debug()
             .subscribe(onNext: { _ in
-                self.startFlash()
+//                self.startFlash()
                 self.startRecording()
             })
             .disposed(by: disposeBag)
-        
+        self.frameView = UIView()
+        self.view.addSubview(frameView)
+        frameView.snp.makeConstraints { make in
+            make.center.equalTo(self.view)
+            make.top.equalTo(self.timeLapsed.snp.bottom).inset(-5)
+            make.bottom.equalTo(self.capture.snp.top).inset(-4)
+            make.left.equalTo(self.view).inset(20)
+            make.right.equalTo(self.view).inset(20)
+        }
+        self.frameView.backgroundColor = UIColor.clear
+        self.frameView.layer.borderColor = UIColor.green.cgColor
+        self.frameView.layer.borderWidth = 2.0
+        self.initiateSubscriptions()
         sessionQueue.async {
             self.configureSession()
         }
@@ -116,7 +125,7 @@ class ViewController: UIViewController {
              do {
                  _ = try avDevice.lockForConfiguration()
              } catch {
-                 print("aaaa")
+                 print("error")
              }
 
              // check if your torchMode is on or off. If on turns it off otherwise turns it on
@@ -127,9 +136,8 @@ class ViewController: UIViewController {
                  do {
                     _ = try avDevice.setTorchModeOn(level: 1.0)
                  } catch {
-                     print("bbb")
+                     print("error")
                  }
-                self.capture.setImage(UIImage(named: "CapturePressed"), for: .normal)
              //    avDevice.setTorchModeOnWithLevel(1.0, error: nil)
              }
              // unlock your device
@@ -137,9 +145,69 @@ class ViewController: UIViewController {
          }
     }
     
+    private func initiateSubscriptions() {
+        connection = nil
+        
+        labelUpdateSubscription = self.viewModel.inputs.createObservableWithoutCondition()
+            .filter{ value -> Bool in
+                return value % 1000 == 0
+            }
+            .map({ value -> String in
+                return "sec: \(value / 1000)"
+            })
+            .bind(to: self.timeLapsed.rx.text)
+        
+//        labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
+//            self.timeLapsed.text = "\(value)"
+//            print(value)
+//        })
+        
+        firstFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 5000)
+            .subscribe(onNext: { _ in
+                self.startFlash()
+            })
+        
+        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 8000)
+            .subscribe(onNext: { _ in
+                self.startFlash()
+            })
+        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 11000)
+            .subscribe(onNext: { _ in
+                self.startFlash()
+            })
+        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 11250)
+            .subscribe(onNext: { _ in
+                self.startFlash()
+                self.stopRecording()
+            })
+    }
+    
     func startRecording() {
         print("start recording")
         self.connection = self.viewModel.inputs.connectToTimer()
+        let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
+        sessionQueue.async {
+            if !self.movieOutput.isRecording {
+                if UIDevice.current.isMultitaskingSupported {
+                    self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+                }
+                
+                // Update the orientation on the movie file output video connection before recording.
+                let movieFileOutputConnection = self.movieOutput.connection(with: .video)
+                movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
+                
+                let availableVideoCodecTypes = self.movieOutput.availableVideoCodecTypes
+                
+                if availableVideoCodecTypes.contains(.hevc) {
+                    self.movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
+                }
+                
+                // Start recording video to a temporary file.
+                let outputFileName = NSUUID().uuidString
+                let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
+                self.movieOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
+            }
+        }
     }
     
     func stopRecording() {
@@ -148,7 +216,15 @@ class ViewController: UIViewController {
         self.secondFlashStart?.dispose()
         self.secondFlashStop?.dispose()
         self.connection?.dispose()
-        self.capture.setImage(UIImage(named: "Capture"), for: .normal)
+        self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
+        self.movieOutput.stopRecording()
+        self.saveFile()
+    }
+    
+    func saveFile() {
+//        guard let documentData = self.movieOutput.dataRepresentation() else { return }
+        let activityController = UIActivityViewController(activityItems: [self.movieOutput.outputFileURL], applicationActivities: nil)
+        self.present(activityController, animated: true, completion: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -202,7 +278,25 @@ class ViewController: UIViewController {
         if setupResult != .success {
             return
         }
+        let movieFileOutput = AVCaptureMovieFileOutput()
         
+        if self.session.canAddOutput(movieFileOutput) {
+            self.session.beginConfiguration()
+            self.session.addOutput(movieFileOutput)
+            self.session.sessionPreset = .high
+            if let connection = movieFileOutput.connection(with: .video) {
+                if connection.isVideoStabilizationSupported {
+                    connection.preferredVideoStabilizationMode = .auto
+                }
+            }
+            self.session.commitConfiguration()
+            
+            self.movieOutput = movieFileOutput
+            
+            DispatchQueue.main.async {
+                self.capture.isEnabled = true
+            }
+        }
         session.beginConfiguration()
         
         /*
@@ -283,5 +377,24 @@ class ViewController: UIViewController {
         self.viewModel = viewModel
     }
 
+}
+
+extension ViewController: AVCaptureFileOutputRecordingDelegate {
+    /// - Tag: DidStartRecording
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        // Enable the Record button to let the user stop recording.
+        DispatchQueue.main.async {
+            self.capture.isEnabled = true
+            self.capture.setImage(#imageLiteral(resourceName: "CapturePressed"), for: [])
+        }
+    }
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        // Enable the Record button to let the user stop recording.
+        DispatchQueue.main.async {
+            self.capture.isEnabled = true
+            self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
+        }
+    }
 }
 
