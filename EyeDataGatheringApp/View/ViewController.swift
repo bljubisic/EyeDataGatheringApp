@@ -56,6 +56,7 @@ class ViewController: UIViewController {
     var firstFlashStop: Disposable!
     var secondFlashStart: Disposable!
     var secondFlashStop: Disposable!
+    var stopVideo: Disposable!
     
     var connection: Disposable?
 
@@ -153,6 +154,8 @@ class ViewController: UIViewController {
     private func initiateSubscriptions() {
         connection = nil
         
+        // Responsible for main timer in application
+        
         labelUpdateSubscription = self.viewModel.inputs.createObservableWithoutCondition()
             .filter{ value -> Bool in
                 return value % 1000 == 0
@@ -162,30 +165,36 @@ class ViewController: UIViewController {
             })
             .observeOn(MainScheduler.instance)
             .bind(to: self.timeLapsed.rx.text)
-        
-//        labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
-//            self.timeLapsed.text = "\(value)"
-//            print(value)
-//        })
-        
+    
+        // First flash should start after 5 seconds
         firstFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 5000)
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
-        
+        //first flash should stop after 3 seconds
         firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 8000)
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
+        // second flash should start 3 seconds after first one
         secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 11000)
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
+        
+        // second flash lasts 0.25 seconds.
         secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 11250)
             .subscribe(onNext: { _ in
                 self.startFlash()
+//                self.stopRecording()
+            })
+        
+        // stop video after 2 seconds. Whole video is 13 second long
+        stopVideo = self.viewModel.inputs.createFilteredObservableWith(condition: 13250)
+            .subscribe(onNext: { _ in
                 self.stopRecording()
             })
+        
     }
     
     func startRecording() {
