@@ -88,7 +88,7 @@ class ViewController: UIViewController {
         timeLapsed.snp.makeConstraints {make in
             make.centerX.equalTo(self.view.snp.centerX)
             make.top.equalTo(self.view).inset(10)
-            make.height.lessThanOrEqualTo(30)
+            make.height.lessThanOrEqualTo(45)
 //            make.height.equalTo(25)
         }
         self.timeLapsed.text = "Starting recording"
@@ -102,11 +102,13 @@ class ViewController: UIViewController {
         self.frameView = UIView()
         self.view.addSubview(frameView)
         frameView.snp.makeConstraints { make in
-            make.center.equalTo(self.view)
-            make.top.equalTo(self.timeLapsed.snp.bottom).inset(-5)
-            make.bottom.equalTo(self.capture.snp.top).inset(-4)
+            make.centerX.equalTo(self.view.snp.centerX)
+            make.top.equalTo(self.view).inset(65)
+            make.bottom.equalTo(self.view).inset(85)
+//            make.bottom.equalTo(self.capture.snp.top).inset(-10)
             make.left.equalTo(self.view).inset(20)
             make.right.equalTo(self.view).inset(20)
+//            make.height.equalTo(217)
         }
         self.frameView.backgroundColor = UIColor.clear
         self.frameView.layer.borderColor = UIColor.green.cgColor
@@ -165,6 +167,7 @@ class ViewController: UIViewController {
             .map({ value -> String in
                 return "sec: \(value / 1000)"
             })
+            .observeOn(MainScheduler.instance)
             .bind(to: self.timeLapsed.rx.text)
         
 //        labelUpdateSubscription = self.timerSubject.subscribe(onNext: { value in
