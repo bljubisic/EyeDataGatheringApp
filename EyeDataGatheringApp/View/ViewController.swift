@@ -61,9 +61,6 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        let model = DataGatheringModel()
-//        self.viewModel = RecordingViewModel(with: model)
 
         preview = PreviewView()
         preview.backgroundColor = UIColor.red
@@ -89,13 +86,11 @@ class ViewController: UIViewController {
             make.centerX.equalTo(self.view.snp.centerX)
             make.top.equalTo(self.view).inset(10)
             make.height.lessThanOrEqualTo(45)
-//            make.height.equalTo(25)
         }
         self.timeLapsed.text = "Starting recording"
         self.capture.rx.tap
             .debug()
             .subscribe(onNext: { _ in
-//                self.startFlash()
                 self.startRecording()
             })
             .disposed(by: disposeBag)
@@ -105,10 +100,8 @@ class ViewController: UIViewController {
             make.centerX.equalTo(self.view.snp.centerX)
             make.top.equalTo(self.view).inset(65)
             make.bottom.equalTo(self.view).inset(85)
-//            make.bottom.equalTo(self.capture.snp.top).inset(-10)
             make.left.equalTo(self.view).inset(20)
             make.right.equalTo(self.view).inset(20)
-//            make.height.equalTo(217)
         }
         self.frameView.backgroundColor = UIColor.clear
         self.frameView.layer.borderColor = UIColor.green.cgColor
