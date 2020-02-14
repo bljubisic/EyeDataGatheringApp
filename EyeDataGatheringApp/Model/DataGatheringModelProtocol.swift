@@ -10,12 +10,11 @@ import Foundation
 import RxSwift
 
 protocol DataGatheringInputs {
-    func connect() -> Disposable
+    func createTimer() -> ConnectableObservable<Int>
     func storeAndEncrypt(file: EyeInfo) -> (Bool, Error?)
 }
 
 protocol DataGatheringOutputs {
-    var timer: ConnectableObservable<Int> { get }
 }
 
 

@@ -11,6 +11,11 @@ import RxSwift
 
 
 class DataGatheringModel: DataGatheringModelProtocol, DataGatheringInputs, DataGatheringOutputs {
+    
+    func createTimer() -> ConnectableObservable<Int> {
+        return Observable.interval(.milliseconds(1), scheduler: MainScheduler.instance).publish()
+    }
+    
     var inputs: DataGatheringInputs {
         return self
     }
@@ -19,18 +24,8 @@ class DataGatheringModel: DataGatheringModelProtocol, DataGatheringInputs, DataG
         return self
     }
     
-    func connect() -> Disposable {
-        return self.timer.connect()
-    }
-    
     func storeAndEncrypt(file: EyeInfo) -> (Bool, Error?) {
         return (true, nil)
-    }
-    
-    var timer: ConnectableObservable<Int>
-    
-    init() {
-        timer = Observable.interval(.milliseconds(1), scheduler: MainScheduler.instance).publish()
     }
     
 }

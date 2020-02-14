@@ -12,6 +12,8 @@ import RxSwift
 class RecordingViewModel: RecordingViewModelProtocol, RecordingInputs, RecordingOutputs {
     var model: DataGatheringModelProtocol
     
+    private var timer: ConnectableObservable<Int>?
+    
     var inputs: RecordingInputs {
         return self
     }
@@ -20,19 +22,28 @@ class RecordingViewModel: RecordingViewModelProtocol, RecordingInputs, Recording
         return self
     }
     
-    func createFilteredObservableWith(condition: Int) -> Observable<Int> {
-        return self.model.outputs.timer
+    func createFilteredObservableWith(condition: Int) -> Observable<Int>? {
+        guard let timer = self.timer else {
+            return nil
+        }
+        return timer
             .filter { value -> Bool in
                 return value == condition
         }
     }
     
-    func createObservableWithoutCondition() -> Observable<Int> {
-        return self.model.outputs.timer
+    func createObservableWithoutCondition() -> Observable<Int>? {
+        guard let timer = self.timer else {
+            return nil
+        }
+        return timer.asObservable()
     }
     
-    func connectToTimer() -> Disposable {
-        return self.model.inputs.connect()
+    func connectToTimer() -> Disposable? {
+        guard let timer = self.timer else {
+            return nil
+        }
+        return timer.connect()
     }
     
     func store(file: EyeInfo) -> (Bool, Error?) {
@@ -41,6 +52,11 @@ class RecordingViewModel: RecordingViewModelProtocol, RecordingInputs, Recording
     
     init(with model: DataGatheringModelProtocol) {
         self.model = model
+    }
+    
+    func createTimer() -> Bool {
+        self.timer = self.model.inputs.createTimer()
+        return true
     }
     
 }

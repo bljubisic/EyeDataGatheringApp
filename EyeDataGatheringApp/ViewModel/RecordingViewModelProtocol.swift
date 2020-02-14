@@ -10,9 +10,10 @@ import Foundation
 import RxSwift
 
 protocol RecordingInputs {
-    func createFilteredObservableWith(condition: Int) -> Observable<Int>
-    func createObservableWithoutCondition() -> Observable<Int>
-    func connectToTimer() -> Disposable
+    func createFilteredObservableWith(condition: Int) -> Observable<Int>?
+    func createObservableWithoutCondition() -> Observable<Int>?
+    func connectToTimer() -> Disposable?
+    func createTimer() -> Bool
     func store(file: EyeInfo) -> (Bool, Error?)
 }
 

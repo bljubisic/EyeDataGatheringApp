@@ -31,6 +31,8 @@ class ViewController: UIViewController {
     var frameView: UIView!
     var flash: UIImageView!
     
+    var focusMarker: UIImageView!
+    
     let session = AVCaptureSession()
     private var isSessionRunning = false
     var movieOutput = AVCaptureMovieFileOutput()
@@ -59,9 +61,27 @@ class ViewController: UIViewController {
     var stopVideo: Disposable!
     
     var connection: Disposable?
+    
+    // MARK: Focus Methods
+    @objc func tapToFocus(_ recognizer: UIGestureRecognizer) {
+        print("Focusing...")
+        if videoDeviceInput.device.isFocusPointOfInterestSupported {
+            let point = recognizer.location(in: self.preview)
+            let pointOfInterest = self.preview.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
+            print("Focusing at: \(point)")
+            focusAtPoint(point: pointOfInterest)
+        }
+    }
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        focusMarker = UIImageView()
+        let image = UIImage(named: "Focus_Point")
+        focusMarker.image = image
+        focusMarker.sizeToFit()
+        focusMarker.isHidden = true
 
         preview = PreviewView()
         preview.backgroundColor = UIColor.red
@@ -69,6 +89,8 @@ class ViewController: UIViewController {
         preview.snp.makeConstraints { (make) in
             make.edges.equalTo(self.view)
         }
+        let tapForFocus = UITapGestureRecognizer(target: self, action: #selector( tapToFocus(_:)))
+        tapForFocus.numberOfTapsRequired = 1
         preview.session = session
         
         capture = UIButton()
@@ -107,6 +129,7 @@ class ViewController: UIViewController {
         self.frameView.backgroundColor = UIColor.clear
         self.frameView.layer.borderColor = UIColor.green.cgColor
         self.frameView.layer.borderWidth = 2.0
+        self.frameView.addGestureRecognizer(tapForFocus)
         
         self.flash = UIImageView()
         self.view.addSubview(flash)
@@ -115,7 +138,7 @@ class ViewController: UIViewController {
             make.top.equalTo(self.view).inset(10)
         }
         self.flash.image = UIImage(named: "flash_off")
-        self.initiateSubscriptions()
+//        self.initiateSubscriptions()
         sessionQueue.async {
             self.configureSession()
         }
@@ -140,7 +163,7 @@ class ViewController: UIViewController {
              } else {
                 // sets the torch intensity to 100%
                 do {
-                    _ = try avDevice.setTorchModeOn(level: 1.0)
+                    _ = try avDevice.setTorchModeOn(level: 0.5)
                 } catch {
                     print("error")
                 }
@@ -156,7 +179,7 @@ class ViewController: UIViewController {
         
         // Responsible for main timer in application
         
-        labelUpdateSubscription = self.viewModel.inputs.createObservableWithoutCondition()
+        labelUpdateSubscription = self.viewModel.inputs.createObservableWithoutCondition()!
             .filter{ value -> Bool in
                 return value % 1000 == 0
             }
@@ -167,30 +190,29 @@ class ViewController: UIViewController {
             .bind(to: self.timeLapsed.rx.text)
     
         // First flash should start after 5 seconds
-        firstFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 5000)
+        firstFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 5000)!
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
         //first flash should stop after 3 seconds
-        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 8000)
+        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 8000)!
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
         // second flash should start 3 seconds after first one
-        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 11000)
+        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 11000)!
             .subscribe(onNext: { _ in
                 self.startFlash()
             })
         
         // second flash lasts 0.25 seconds.
-        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 11250)
+        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 11250)!
             .subscribe(onNext: { _ in
                 self.startFlash()
-//                self.stopRecording()
             })
         
         // stop video after 2 seconds. Whole video is 13 second long
-        stopVideo = self.viewModel.inputs.createFilteredObservableWith(condition: 13250)
+        stopVideo = self.viewModel.inputs.createFilteredObservableWith(condition: 13250)!
             .subscribe(onNext: { _ in
                 self.stopRecording()
             })
@@ -199,6 +221,8 @@ class ViewController: UIViewController {
     
     func startRecording() {
         print("start recording")
+        _ = self.viewModel.inputs.createTimer()
+        self.initiateSubscriptions()
         self.connection = self.viewModel.inputs.connectToTimer()
         let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
         sessionQueue.async {
@@ -390,6 +414,22 @@ class ViewController: UIViewController {
     
     func insert(viewModel: RecordingViewModelProtocol) {
         self.viewModel = viewModel
+    }
+    
+    func focusAtPoint(point: CGPoint) {
+        let device = videoDeviceInput.device
+        // Make sure the device supports focus on POI and Auto Focus.
+        if device.isFocusPointOfInterestSupported &&
+            device.isFocusModeSupported(AVCaptureDevice.FocusMode.autoFocus) {
+            do {
+                try device.lockForConfiguration()
+                device.focusPointOfInterest = point
+                device.focusMode = AVCaptureDevice.FocusMode.autoFocus
+                device.unlockForConfiguration()
+            } catch {
+                print("Error focusing on POI: \(error)")
+            }
+        }
     }
 
 }
