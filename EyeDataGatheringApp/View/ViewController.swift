@@ -377,25 +377,25 @@ class ViewController: UIViewController {
                 videoDeviceInput.device.focusMode = .continuousAutoFocus
                 videoDeviceInput.device.unlockForConfiguration()
                 self.videoDeviceInput = videoDeviceInput
-                DispatchQueue.main.async {
-                    /*
-                     Dispatch video streaming to the main queue because AVCaptureVideoPreviewLayer is the backing layer for PreviewView.
-                     You can manipulate UIView only on the main thread.
-                     Note: As an exception to the above rule, it's not necessary to serialize video orientation changes
-                     on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-                     
-                     Use the window scene's orientation as the initial video orientation. Subsequent orientation changes are
-                     handled by CameraViewController.viewWillTransition(to:with:).
-                     */
-                    var initialVideoOrientation: AVCaptureVideoOrientation = .landscapeLeft
-                    if self.windowOrientation != .unknown {
-                        if let videoOrientation = AVCaptureVideoOrientation(rawValue: self.windowOrientation.rawValue) {
-                            initialVideoOrientation = videoOrientation
-                        }
-                    }
-                    
-                    self.preview.videoPreviewLayer.connection?.videoOrientation = initialVideoOrientation
-                }
+//                DispatchQueue.main.async {
+//                    /*
+//                     Dispatch video streaming to the main queue because AVCaptureVideoPreviewLayer is the backing layer for PreviewView.
+//                     You can manipulate UIView only on the main thread.
+//                     Note: As an exception to the above rule, it's not necessary to serialize video orientation changes
+//                     on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
+//
+//                     Use the window scene's orientation as the initial video orientation. Subsequent orientation changes are
+//                     handled by CameraViewController.viewWillTransition(to:with:).
+//                     */
+//                    var initialVideoOrientation: AVCaptureVideoOrientation = .landscapeLeft
+//                    if self.windowOrientation != .unknown {
+//                        if let videoOrientation = AVCaptureVideoOrientation(rawValue: self.windowOrientation.rawValue) {
+//                            initialVideoOrientation = videoOrientation
+//                        }
+//                    }
+//
+//                    self.preview.videoPreviewLayer.connection?.videoOrientation = initialVideoOrientation
+//                }
             } else {
                 print("Couldn't add video device input to the session.")
                 setupResult = .configurationFailed
@@ -428,6 +428,29 @@ class ViewController: UIViewController {
                 device.unlockForConfiguration()
             } catch {
                 print("Error focusing on POI: \(error)")
+            }
+        }
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        if let connection = self.preview.videoPreviewLayer.connection {
+            let currentDevice: UIDevice = UIDevice.current
+            let orientation: UIDeviceOrientation = currentDevice.orientation
+            let previewLayerConnection : AVCaptureConnection = connection
+
+            if (previewLayerConnection.isVideoOrientationSupported) {
+                switch (orientation) {
+                case .portrait:
+                    previewLayerConnection.videoOrientation = .portrait
+                case .landscapeRight:
+                    previewLayerConnection.videoOrientation = .landscapeLeft
+                case .landscapeLeft:
+                    previewLayerConnection.videoOrientation = .landscapeRight
+
+                default:
+                    previewLayerConnection.videoOrientation = AVCaptureVideoOrientation.portrait
+                }
             }
         }
     }
