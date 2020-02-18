@@ -25,22 +25,20 @@ class ViewController: UIViewController {
         return view.window?.windowScene?.interfaceOrientation ?? .unknown
     }
     
+    // Neccesary elements on the screen
+    
     var preview: PreviewView!
     var capture: UIButton!
     var timeLapsed: UILabel!
     var frameView: UIView!
-    var flash: UIImageView!
+    var flash: UIButton!
     
-    var focusMarker: UIImageView!
-    
+    // Video Session variables
     let session = AVCaptureSession()
     private var isSessionRunning = false
     var movieOutput = AVCaptureMovieFileOutput()
     var previewLayer: AVCaptureVideoPreviewLayer!
     var activeInput: AVCaptureDeviceInput!
-    
-    let disposeBag = DisposeBag()
-    
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     
     private let sessionQueue = DispatchQueue(label: "session queue")
@@ -48,19 +46,10 @@ class ViewController: UIViewController {
     
     private var setupResult: SessionSetupResult = .success
     
+    // Reactive dispose bag
+    let disposeBag = DisposeBag()
+    // ViewModel variable
     private var viewModel: RecordingViewModelProtocol!
-    
-    let timerSubject = Observable<Int>.interval(.milliseconds(1), scheduler: MainScheduler.instance).debug().publish()
-    
-    var labelUpdateSubscription: Disposable!
-    
-    var firstFlashStart: Disposable!
-    var firstFlashStop: Disposable!
-    var secondFlashStart: Disposable!
-    var secondFlashStop: Disposable!
-    var stopVideo: Disposable!
-    
-    var connection: Disposable?
     
     // MARK: Focus Methods
     @objc func tapToFocus(_ recognizer: UIGestureRecognizer) {
@@ -76,23 +65,16 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        focusMarker = UIImageView()
-        let image = UIImage(named: "Focus_Point")
-        focusMarker.image = image
-        focusMarker.sizeToFit()
-        focusMarker.isHidden = true
 
+        // Setup Video preview screen
         preview = PreviewView()
-        preview.backgroundColor = UIColor.red
         self.view.addSubview(preview)
         preview.snp.makeConstraints { (make) in
             make.edges.equalTo(self.view)
         }
-        let tapForFocus = UITapGestureRecognizer(target: self, action: #selector( tapToFocus(_:)))
-        tapForFocus.numberOfTapsRequired = 1
         preview.session = session
         
+        // Video Capture button setup
         capture = UIButton()
         capture.setImage(UIImage(named: "Capture"), for: .normal)
         self.view.addSubview(capture)
@@ -102,7 +84,14 @@ class ViewController: UIViewController {
             make.height.equalTo(75)
             make.width.equalTo(75)
         }
+        self.capture.rx.tap
+            .debug()
+            .subscribe(onNext: { _ in
+                self.startRecording()
+            })
+            .disposed(by: disposeBag)
         
+        // Timer label setup
         timeLapsed = UILabel()
         self.view.addSubview(timeLapsed)
         timeLapsed.snp.makeConstraints {make in
@@ -111,12 +100,8 @@ class ViewController: UIViewController {
             make.height.lessThanOrEqualTo(45)
         }
         self.timeLapsed.text = "Starting recording"
-        self.capture.rx.tap
-            .debug()
-            .subscribe(onNext: { _ in
-                self.startRecording()
-            })
-            .disposed(by: disposeBag)
+
+        // Inner frame setup + adding tap gesture recognizer
         self.frameView = UIView()
         self.view.addSubview(frameView)
         frameView.snp.makeConstraints { make in
@@ -129,23 +114,31 @@ class ViewController: UIViewController {
         self.frameView.backgroundColor = UIColor.clear
         self.frameView.layer.borderColor = UIColor.green.cgColor
         self.frameView.layer.borderWidth = 2.0
+        let tapForFocus = UITapGestureRecognizer(target: self, action: #selector( tapToFocus(_:)))
+        tapForFocus.numberOfTapsRequired = 1
         self.frameView.addGestureRecognizer(tapForFocus)
         
-        self.flash = UIImageView()
+        // Flash button setup
+        self.flash = UIButton()
         self.view.addSubview(flash)
         flash.snp.makeConstraints { make in
             make.left.equalTo(self.view).inset(20)
             make.top.equalTo(self.view).inset(10)
         }
-        self.flash.image = UIImage(named: "flash_off")
-//        self.initiateSubscriptions()
+        self.flash.setImage(UIImage(named: "flash_off"), for: .normal)
+        self.flash.rx.tap
+            .debug()
+            .subscribe(onNext: { _ in
+                self.startFlash()
+            })
+            .disposed(by: disposeBag)
         sessionQueue.async {
             self.configureSession()
         }
     }
     
     func startFlash() {
-        let avDevice = videoDeviceInput.device
+        let avDevice = self.videoDeviceInput.device
 
          // check if the device has torch
         if avDevice.hasFlash {
@@ -159,7 +152,7 @@ class ViewController: UIViewController {
              // check if your torchMode is on or off. If on turns it off otherwise turns it on
             if avDevice.isTorchActive {
                 avDevice.torchMode = AVCaptureDevice.TorchMode.off
-                self.flash.image = UIImage(named: "flash_off")
+                self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
              } else {
                 // sets the torch intensity to 100%
                 do {
@@ -167,102 +160,97 @@ class ViewController: UIViewController {
                 } catch {
                     print("error")
                 }
-                self.flash.image = UIImage(named: "flash_on")
+                self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
              }
              // unlock your device
              avDevice.unlockForConfiguration()
-         }
-    }
-    
-    private func initiateSubscriptions() {
-        connection = nil
-        
-        // Responsible for main timer in application
-        
-        labelUpdateSubscription = self.viewModel.inputs.createObservableWithoutCondition()!
-            .filter{ value -> Bool in
-                return value % 1000 == 0
-            }
-            .map({ value -> String in
-                return "sec: \(value / 1000)"
-            })
-            .observeOn(MainScheduler.instance)
-            .bind(to: self.timeLapsed.rx.text)
-    
-        // First flash should start after 5 seconds
-        firstFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 5000)!
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        //first flash should stop after 3 seconds
-        firstFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 8000)!
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        // second flash should start 3 seconds after first one
-        secondFlashStart = self.viewModel.inputs.createFilteredObservableWith(condition: 11000)!
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        
-        // second flash lasts 0.25 seconds.
-        secondFlashStop = self.viewModel.inputs.createFilteredObservableWith(condition: 11250)!
-            .subscribe(onNext: { _ in
-                self.startFlash()
-            })
-        
-        // stop video after 2 seconds. Whole video is 13 second long
-        stopVideo = self.viewModel.inputs.createFilteredObservableWith(condition: 13250)!
-            .subscribe(onNext: { _ in
-                self.stopRecording()
-            })
-        
-    }
-    
-    func startRecording() {
-        print("start recording")
-        _ = self.viewModel.inputs.createTimer()
-        self.initiateSubscriptions()
-        self.connection = self.viewModel.inputs.connectToTimer()
-        let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
-        sessionQueue.async {
-            if !self.movieOutput.isRecording {
-                if UIDevice.current.isMultitaskingSupported {
-                    self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-                }
-                
-                // Update the orientation on the movie file output video connection before recording.
-                let movieFileOutputConnection = self.movieOutput.connection(with: .video)
-                movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
-                
-                let availableVideoCodecTypes = self.movieOutput.availableVideoCodecTypes
-                
-                if availableVideoCodecTypes.contains(.hevc) {
-                    self.movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
-                }
-                
-                // Start recording video to a temporary file.
-                let outputFileName = NSUUID().uuidString
-                let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
-                self.movieOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
-            }
         }
     }
     
-    func stopRecording() {
-        self.labelUpdateSubscription?.dispose()
-        self.firstFlashStop?.dispose()
-        self.secondFlashStart?.dispose()
-        self.secondFlashStop?.dispose()
-        self.connection?.dispose()
-        self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
-        self.movieOutput.stopRecording()
-        self.saveFile()
+    /**
+     Starting recording consists of several functionalities:
+     - First timer is created in Model
+     - All signals are created and subscribed on
+     - Finaly, timer is triggered and outout file is opened
+     */
+    func startRecording() {
+        print("start recording")
+        _ = self.viewModel.inputs.createTimer()
+        let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
+        // Timer signal
+        self.viewModel.outputs.labelTimerSignal
+            .observeOn(MainScheduler.instance)
+            .bind(to: self.timeLapsed.rx.text)
+            .disposed(by: disposeBag)
+        // Signal for starting and stoping recording
+        self.viewModel.outputs.recordingSignal
+            .subscribe(onNext: { status in
+                if status {
+                    self.sessionQueue.async {
+                        if !self.movieOutput.isRecording {
+                            if UIDevice.current.isMultitaskingSupported {
+                                self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+                            }
+                            
+                            // Update the orientation on the movie file output video connection before recording.
+                            let movieFileOutputConnection = self.movieOutput.connection(with: .video)
+                            movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
+                            
+                            let availableVideoCodecTypes = self.movieOutput.availableVideoCodecTypes
+                            
+                            if availableVideoCodecTypes.contains(.hevc) {
+                                self.movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
+                            }
+                            
+                            // Start recording video to a temporary file.
+                            let outputFileName = NSUUID().uuidString
+                            let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
+                            self.movieOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
+                        }
+                    }
+                } else {
+                    self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
+                    self.movieOutput.stopRecording()
+                    self.saveFile()
+                }
+            }).disposed(by: self.disposeBag)
+        // Signal for starting or stopping the flash
+        self.viewModel.outputs.flashSignal
+            .subscribe(onNext: { status in
+                let avDevice = self.videoDeviceInput.device
+
+                 // check if the device has torch
+                if avDevice.hasFlash {
+                     // lock your device for configuration
+                     do {
+                         _ = try avDevice.lockForConfiguration()
+                     } catch {
+                         print("error")
+                     }
+
+                     // check if your torchMode is on or off. If on turns it off otherwise turns it on
+                    if !status {
+                        avDevice.torchMode = AVCaptureDevice.TorchMode.off
+                        self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
+                     } else {
+                        // sets the torch intensity to 100%
+                        do {
+                            _ = try avDevice.setTorchModeOn(level: 0.5)
+                        } catch {
+                            print("error")
+                        }
+                        self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
+                     }
+                     // unlock your device
+                     avDevice.unlockForConfiguration()
+                 }
+            }).disposed(by: self.disposeBag)
+        self.viewModel.inputs.startRecording()
+
     }
     
     func saveFile() {
-//        guard let documentData = self.movieOutput.dataRepresentation() else { return }
-        let activityController = UIActivityViewController(activityItems: [self.movieOutput.outputFileURL], applicationActivities: nil)
+        let activityController = UIActivityViewController(activityItems: [self.movieOutput.outputFileURL as Any], applicationActivities: nil)
         self.present(activityController, animated: true, completion: nil)
     }
     
@@ -319,33 +307,27 @@ class ViewController: UIViewController {
         }
         let movieFileOutput = AVCaptureMovieFileOutput()
         
-        if self.session.canAddOutput(movieFileOutput) {
-            self.session.beginConfiguration()
-            self.session.addOutput(movieFileOutput)
-            self.session.sessionPreset = .high
-            if let connection = movieFileOutput.connection(with: .video) {
-                if connection.isVideoStabilizationSupported {
-                    connection.preferredVideoStabilizationMode = .auto
-                }
-            }
-            self.session.commitConfiguration()
-            
-            self.movieOutput = movieFileOutput
-            
-            DispatchQueue.main.async {
-                self.capture.isEnabled = true
-            }
-        }
+
         session.beginConfiguration()
-        
-        /*
-         Do not create an AVCaptureMovieFileOutput when setting up the session because
-         Live Photo is not supported when AVCaptureMovieFileOutput is added to the session.
-         */
-        session.sessionPreset = .hd4K3840x2160
         
         // Add video input.
         do {
+            if self.session.canAddOutput(movieFileOutput) {
+                self.session.addOutput(movieFileOutput)
+                self.session.sessionPreset = .hd4K3840x2160
+                if let connection = movieFileOutput.connection(with: .video) {
+                    if connection.isVideoStabilizationSupported {
+                        connection.preferredVideoStabilizationMode = .auto
+                    }
+                }
+                
+                self.movieOutput = movieFileOutput
+                
+                DispatchQueue.main.async {
+                    self.capture.isEnabled = true
+                }
+            }
+            
             var defaultVideoDevice: AVCaptureDevice?
             
             // Choose the back dual camera, if available, otherwise default to a wide angle camera.
@@ -377,25 +359,6 @@ class ViewController: UIViewController {
                 videoDeviceInput.device.focusMode = .continuousAutoFocus
                 videoDeviceInput.device.unlockForConfiguration()
                 self.videoDeviceInput = videoDeviceInput
-//                DispatchQueue.main.async {
-//                    /*
-//                     Dispatch video streaming to the main queue because AVCaptureVideoPreviewLayer is the backing layer for PreviewView.
-//                     You can manipulate UIView only on the main thread.
-//                     Note: As an exception to the above rule, it's not necessary to serialize video orientation changes
-//                     on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-//
-//                     Use the window scene's orientation as the initial video orientation. Subsequent orientation changes are
-//                     handled by CameraViewController.viewWillTransition(to:with:).
-//                     */
-//                    var initialVideoOrientation: AVCaptureVideoOrientation = .landscapeLeft
-//                    if self.windowOrientation != .unknown {
-//                        if let videoOrientation = AVCaptureVideoOrientation(rawValue: self.windowOrientation.rawValue) {
-//                            initialVideoOrientation = videoOrientation
-//                        }
-//                    }
-//
-//                    self.preview.videoPreviewLayer.connection?.videoOrientation = initialVideoOrientation
-//                }
             } else {
                 print("Couldn't add video device input to the session.")
                 setupResult = .configurationFailed

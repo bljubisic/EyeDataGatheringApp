@@ -15,10 +15,15 @@ protocol RecordingInputs {
     func connectToTimer() -> Disposable?
     func createTimer() -> Bool
     func store(file: EyeInfo) -> (Bool, Error?)
+    func startRecording() -> Void
 }
 
 protocol RecordingOutputs {
     var model: DataGatheringModelProtocol { get }
+    
+    var flashSignal: Observable<Bool> { get }
+    var recordingSignal: Observable<Bool> { get }
+    var labelTimerSignal: Observable<String> { get }
 }
 
 protocol RecordingViewModelProtocol {
