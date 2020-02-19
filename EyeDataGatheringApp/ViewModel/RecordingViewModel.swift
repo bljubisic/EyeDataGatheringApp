@@ -26,6 +26,9 @@ class RecordingViewModel: RecordingViewModelProtocol {
     
     private var connection: Disposable?
     
+    /**
+     Helper method for creating observables with condition
+     */
     func createFilteredObservableWith(condition: Int) -> Observable<Int>? {
         guard let timer = self.timer else {
             return nil
@@ -35,14 +38,18 @@ class RecordingViewModel: RecordingViewModelProtocol {
                 return value == condition
         }
     }
-    
+    /**
+     Helper method for creating observables without conditions
+     */
     func createObservableWithoutCondition() -> Observable<Int>? {
         guard let timer = self.timer else {
             return nil
         }
         return timer.asObservable()
     }
-    
+    /**
+     Connecting to Timer
+     */
     func connectToTimer() -> Disposable? {
         guard let timer = self.timer else {
             return nil
@@ -57,7 +64,9 @@ class RecordingViewModel: RecordingViewModelProtocol {
     init(with model: DataGatheringModelProtocol) {
         self.model = model
     }
-    
+    /**
+     Creating timer observable in Model
+     */
     func createTimer() -> Bool {
         self.timer = self.model.inputs.createTimer()
         return true
@@ -66,7 +75,17 @@ class RecordingViewModel: RecordingViewModelProtocol {
 }
 
 extension RecordingViewModel: RecordingInputs {
-    
+    /**
+     Start Recording consists of following things:
+     - Create timer observable
+     - Create following observables and connect all of them to Timer
+        - timer label observable,
+        - first flash start observable after 5 sec.
+        - first flash stop observable after 3 sec
+        - second flash start and stop observables after 3 sec which lasts 0.25 of a sec
+        - stop recording
+     - Start Timer observable
+     */
     func startRecording() {
         print("start recording")
         _ = self.model.inputs.createTimer()

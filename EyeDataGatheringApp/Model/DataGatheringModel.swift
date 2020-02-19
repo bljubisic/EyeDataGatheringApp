@@ -11,7 +11,9 @@ import RxSwift
 
 
 class DataGatheringModel: DataGatheringModelProtocol, DataGatheringInputs, DataGatheringOutputs {
-    
+    /**
+     Creating the Timer observable which push one event every miliseconds
+     */
     func createTimer() -> ConnectableObservable<Int> {
         return Observable.interval(.milliseconds(1), scheduler: MainScheduler.instance).publish()
     }
