@@ -26,7 +26,6 @@ class ViewController: UIViewController {
     }
     
     // Neccesary elements on the screen
-    
     var preview: PreviewView!
     var capture: UIButton!
     var timeLapsed: UILabel!
@@ -51,21 +50,87 @@ class ViewController: UIViewController {
     // ViewModel variable
     private var viewModel: RecordingViewModelProtocol!
     
-    // MARK: Focus Methods
-    @objc func tapToFocus(_ recognizer: UIGestureRecognizer) {
-        print("Focusing...")
-        if videoDeviceInput.device.isFocusPointOfInterestSupported {
-            let point = recognizer.location(in: self.preview)
-            let pointOfInterest = self.preview.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
-            print("Focusing at: \(point)")
-            focusAtPoint(point: pointOfInterest)
-        }
-    }
-    
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.configureScreen()
+        
+        sessionQueue.async {
+            self.configureSession()
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        sessionQueue.async {
+            switch self.setupResult {
+            case .success:
+                // Only setup observers and start the session if setup succeeded.
+                self.session.startRunning()
+                self.isSessionRunning = self.session.isRunning
+                
+            case .notAuthorized:
+                DispatchQueue.main.async {
+                    let changePrivacySetting = "AVCam doesn't have permission to use the camera, please change privacy settings"
+                    let message = NSLocalizedString(changePrivacySetting, comment: "Alert message when the user has denied access to the camera")
+                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
+                    
+                    alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
+                                                            style: .cancel,
+                                                            handler: nil))
+                    
+                    alertController.addAction(UIAlertAction(title: NSLocalizedString("Settings", comment: "Alert button to open Settings"),
+                                                            style: .`default`,
+                                                            handler: { _ in
+                                                                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!,
+                                                                                          options: [:],
+                                                                                          completionHandler: nil)
+                    }))
+                    
+                    self.present(alertController, animated: true, completion: nil)
+                }
+                
+            case .configurationFailed:
+                DispatchQueue.main.async {
+                    let alertMsg = "Alert message when something goes wrong during capture session configuration"
+                    let message = NSLocalizedString("Unable to capture media", comment: alertMsg)
+                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
+                    
+                    alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
+                                                            style: .cancel,
+                                                            handler: nil))
+                    
+                    self.present(alertController, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        if let connection = self.preview.videoPreviewLayer.connection {
+            let currentDevice: UIDevice = UIDevice.current
+            let orientation: UIDeviceOrientation = currentDevice.orientation
+            let previewLayerConnection : AVCaptureConnection = connection
+
+            if (previewLayerConnection.isVideoOrientationSupported) {
+                switch (orientation) {
+                case .portrait:
+                    previewLayerConnection.videoOrientation = .portrait
+                case .landscapeRight:
+                    previewLayerConnection.videoOrientation = .landscapeLeft
+                case .landscapeLeft:
+                    previewLayerConnection.videoOrientation = .landscapeRight
+
+                default:
+                    previewLayerConnection.videoOrientation = AVCaptureVideoOrientation.portrait
+                }
+            }
+        }
+    }
+    
+    private func configureScreen() -> Void {
         // Setup Video preview screen
         preview = PreviewView()
         self.view.addSubview(preview)
@@ -132,173 +197,6 @@ class ViewController: UIViewController {
                 self.startFlash()
             })
             .disposed(by: disposeBag)
-        sessionQueue.async {
-            self.configureSession()
-        }
-    }
-    
-    func startFlash() {
-        let avDevice = self.videoDeviceInput.device
-
-         // check if the device has torch
-        if avDevice.hasFlash {
-             // lock your device for configuration
-             do {
-                 _ = try avDevice.lockForConfiguration()
-             } catch {
-                 print("error")
-             }
-
-             // check if your torchMode is on or off. If on turns it off otherwise turns it on
-            if avDevice.isTorchActive {
-                avDevice.torchMode = AVCaptureDevice.TorchMode.off
-                self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
-             } else {
-                // sets the torch intensity to 100%
-                do {
-                    _ = try avDevice.setTorchModeOn(level: 0.5)
-                } catch {
-                    print("error")
-                }
-                self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
-             }
-             // unlock your device
-             avDevice.unlockForConfiguration()
-        }
-    }
-    
-    /**
-     Starting recording consists of several functionalities:
-     - First timer is created in Model
-     - All signals are created and subscribed on
-     - Finaly, timer is triggered and outout file is opened
-     */
-    func startRecording() {
-        print("start recording")
-        _ = self.viewModel.inputs.createTimer()
-        let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
-        // Timer signal
-        self.viewModel.outputs.labelTimerSignal
-            .observeOn(MainScheduler.instance)
-            .bind(to: self.timeLapsed.rx.text)
-            .disposed(by: disposeBag)
-        // Signal for starting and stoping recording
-        self.viewModel.outputs.recordingSignal
-            .subscribe(onNext: { status in
-                if status {
-                    self.sessionQueue.async {
-                        if !self.movieOutput.isRecording {
-                            if UIDevice.current.isMultitaskingSupported {
-                                self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-                            }
-                            
-                            // Update the orientation on the movie file output video connection before recording.
-                            let movieFileOutputConnection = self.movieOutput.connection(with: .video)
-                            movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
-                            
-                            let availableVideoCodecTypes = self.movieOutput.availableVideoCodecTypes
-                            
-                            if availableVideoCodecTypes.contains(.hevc) {
-                                self.movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
-                            }
-                            
-                            // Start recording video to a temporary file.
-                            let outputFileName = NSUUID().uuidString
-                            let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
-                            self.movieOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
-                        }
-                    }
-                } else {
-                    self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
-                    self.movieOutput.stopRecording()
-                    self.saveFile()
-                }
-            }).disposed(by: self.disposeBag)
-        // Signal for starting or stopping the flash
-        self.viewModel.outputs.flashSignal
-            .subscribe(onNext: { status in
-                let avDevice = self.videoDeviceInput.device
-
-                 // check if the device has torch
-                if avDevice.hasFlash {
-                     // lock your device for configuration
-                     do {
-                         _ = try avDevice.lockForConfiguration()
-                     } catch {
-                         print("error")
-                     }
-
-                     // check if your torchMode is on or off. If on turns it off otherwise turns it on
-                    if !status {
-                        avDevice.torchMode = AVCaptureDevice.TorchMode.off
-                        self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
-                     } else {
-                        // sets the torch intensity to 100%
-                        do {
-                            _ = try avDevice.setTorchModeOn(level: 0.5)
-                        } catch {
-                            print("error")
-                        }
-                        self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
-                     }
-                     // unlock your device
-                     avDevice.unlockForConfiguration()
-                 }
-            }).disposed(by: self.disposeBag)
-        self.viewModel.inputs.startRecording()
-
-    }
-    
-    func saveFile() {
-        let activityController = UIActivityViewController(activityItems: [self.movieOutput.outputFileURL as Any], applicationActivities: nil)
-        self.present(activityController, animated: true, completion: nil)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        sessionQueue.async {
-            switch self.setupResult {
-            case .success:
-                // Only setup observers and start the session if setup succeeded.
-                self.session.startRunning()
-                self.isSessionRunning = self.session.isRunning
-                
-            case .notAuthorized:
-                DispatchQueue.main.async {
-                    let changePrivacySetting = "AVCam doesn't have permission to use the camera, please change privacy settings"
-                    let message = NSLocalizedString(changePrivacySetting, comment: "Alert message when the user has denied access to the camera")
-                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
-                    
-                    alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
-                                                            style: .cancel,
-                                                            handler: nil))
-                    
-                    alertController.addAction(UIAlertAction(title: NSLocalizedString("Settings", comment: "Alert button to open Settings"),
-                                                            style: .`default`,
-                                                            handler: { _ in
-                                                                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!,
-                                                                                          options: [:],
-                                                                                          completionHandler: nil)
-                    }))
-                    
-                    self.present(alertController, animated: true, completion: nil)
-                }
-                
-            case .configurationFailed:
-                DispatchQueue.main.async {
-                    let alertMsg = "Alert message when something goes wrong during capture session configuration"
-                    let message = NSLocalizedString("Unable to capture media", comment: alertMsg)
-                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
-                    
-                    alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
-                                                            style: .cancel,
-                                                            handler: nil))
-                    
-                    self.present(alertController, animated: true, completion: nil)
-                }
-            }
-        }
     }
     
     private func configureSession() {
@@ -375,11 +273,139 @@ class ViewController: UIViewController {
         session.commitConfiguration()
     }
     
+    private func startFlash() {
+        let avDevice = self.videoDeviceInput.device
+
+         // check if the device has torch
+        if avDevice.hasFlash {
+             // lock your device for configuration
+             do {
+                 _ = try avDevice.lockForConfiguration()
+             } catch {
+                 print("error")
+             }
+
+             // check if your torchMode is on or off. If on turns it off otherwise turns it on
+            if avDevice.isTorchActive {
+                avDevice.torchMode = AVCaptureDevice.TorchMode.off
+                self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
+             } else {
+                // sets the torch intensity to 100%
+                do {
+                    _ = try avDevice.setTorchModeOn(level: 0.5)
+                } catch {
+                    print("error")
+                }
+                self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
+             }
+             // unlock your device
+             avDevice.unlockForConfiguration()
+        }
+    }
+    
+    /**
+     Starting recording consists of several functionalities:
+     - First timer is created in Model
+     - All signals are created and subscribed on
+     - Finaly, timer is triggered and outout file is opened
+     */
+    private func startRecording() {
+        print("start recording")
+        _ = self.viewModel.inputs.createTimer()
+        let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
+        // Timer signal
+        self.viewModel.outputs.labelTimerSignal
+            .observeOn(MainScheduler.instance)
+            .bind(to: self.timeLapsed.rx.text)
+            .disposed(by: disposeBag)
+        // Signal for starting and stoping recording
+        self.viewModel.outputs.recordingSignal
+            .subscribe(onNext: { status in
+                if status {
+                    self.sessionQueue.async {
+                        if !self.movieOutput.isRecording {
+                            if UIDevice.current.isMultitaskingSupported {
+                                self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+                            }
+                            
+                            // Update the orientation on the movie file output video connection before recording.
+                            let movieFileOutputConnection = self.movieOutput.connection(with: .video)
+                            movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
+                            
+                            let availableVideoCodecTypes = self.movieOutput.availableVideoCodecTypes
+                            
+                            if availableVideoCodecTypes.contains(.hevc) {
+                                self.movieOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
+                            }
+                            
+                            // Start recording video to a temporary file.
+                            let outputFileName = NSUUID().uuidString
+                            let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
+                            self.movieOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
+                        }
+                    }
+                } else {
+                    self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
+                    self.movieOutput.stopRecording()
+                    self.saveFile()
+                }
+            }).disposed(by: self.disposeBag)
+        // Signal for starting or stopping the flash
+        self.viewModel.outputs.flashSignal
+            .subscribe(onNext: { status in
+                let avDevice = self.videoDeviceInput.device
+
+                 // check if the device has torch
+                if avDevice.hasFlash {
+                     // lock your device for configuration
+                     do {
+                         _ = try avDevice.lockForConfiguration()
+                     } catch {
+                         print("error")
+                     }
+
+                     // check if your torchMode is on or off. If on turns it off otherwise turns it on
+                    if !status {
+                        avDevice.torchMode = AVCaptureDevice.TorchMode.off
+                        self.flash.setImage(UIImage(named:"flash_off"), for: .normal)
+                     } else {
+                        // sets the torch intensity to 100%
+                        do {
+                            _ = try avDevice.setTorchModeOn(level: 0.5)
+                        } catch {
+                            print("error")
+                        }
+                        self.flash.setImage(UIImage(named:"flash_on"), for: .normal)
+                     }
+                     // unlock your device
+                     avDevice.unlockForConfiguration()
+                 }
+            }).disposed(by: self.disposeBag)
+        self.viewModel.inputs.startRecording()
+
+    }
+    
+    private func saveFile() {
+        let activityController = UIActivityViewController(activityItems: [self.movieOutput.outputFileURL as Any], applicationActivities: nil)
+        self.present(activityController, animated: true, completion: nil)
+    }
+    
     func insert(viewModel: RecordingViewModelProtocol) {
         self.viewModel = viewModel
     }
     
-    func focusAtPoint(point: CGPoint) {
+    // MARK: Focus Methods
+    @objc func tapToFocus(_ recognizer: UIGestureRecognizer) {
+        print("Focusing...")
+        if videoDeviceInput.device.isFocusPointOfInterestSupported {
+            let point = recognizer.location(in: self.preview)
+            let pointOfInterest = self.preview.videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: point)
+            print("Focusing at: \(point)")
+            focusAtPoint(point: pointOfInterest)
+        }
+    }
+    
+    private func focusAtPoint(point: CGPoint) {
         let device = videoDeviceInput.device
         // Make sure the device supports focus on POI and Auto Focus.
         if device.isFocusPointOfInterestSupported &&
@@ -394,30 +420,6 @@ class ViewController: UIViewController {
             }
         }
     }
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        if let connection = self.preview.videoPreviewLayer.connection {
-            let currentDevice: UIDevice = UIDevice.current
-            let orientation: UIDeviceOrientation = currentDevice.orientation
-            let previewLayerConnection : AVCaptureConnection = connection
-
-            if (previewLayerConnection.isVideoOrientationSupported) {
-                switch (orientation) {
-                case .portrait:
-                    previewLayerConnection.videoOrientation = .portrait
-                case .landscapeRight:
-                    previewLayerConnection.videoOrientation = .landscapeLeft
-                case .landscapeLeft:
-                    previewLayerConnection.videoOrientation = .landscapeRight
-
-                default:
-                    previewLayerConnection.videoOrientation = AVCaptureVideoOrientation.portrait
-                }
-            }
-        }
-    }
-
 }
 
 extension ViewController: AVCaptureFileOutputRecordingDelegate {
