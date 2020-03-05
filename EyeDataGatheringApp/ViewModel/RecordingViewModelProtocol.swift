@@ -16,6 +16,7 @@ protocol RecordingInputs {
     func createTimer() -> Bool
     func store(file: EyeInfo) -> (Bool, Error?)
     func startRecording() -> Void
+    func stopRecording() -> Void
 }
 
 protocol RecordingOutputs {

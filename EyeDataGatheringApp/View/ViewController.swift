@@ -310,7 +310,6 @@ class ViewController: UIViewController {
      - Finaly, timer is triggered and outout file is opened
      */
     private func startRecording() {
-        print("start recording")
         _ = self.viewModel.inputs.createTimer()
         let videoPreviewLayerOrientation = self.preview.videoPreviewLayer.connection?.videoOrientation
         // Timer signal
@@ -347,7 +346,8 @@ class ViewController: UIViewController {
                 } else {
                     self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
                     self.movieOutput.stopRecording()
-                    self.saveFile()
+        //                    self.saveFile()
+                    return
                 }
             }).disposed(by: self.disposeBag)
         // Signal for starting or stopping the flash
@@ -381,8 +381,14 @@ class ViewController: UIViewController {
                      avDevice.unlockForConfiguration()
                  }
             }).disposed(by: self.disposeBag)
-        self.viewModel.inputs.startRecording()
-
+        if self.movieOutput.isRecording {
+            self.capture.setImage(#imageLiteral(resourceName: "CapturePressed"), for: [])
+            self.viewModel.inputs.stopRecording()
+        }
+        else {
+            self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
+            self.viewModel.inputs.startRecording()
+        }
     }
     
     private func saveFile() {
@@ -436,6 +442,7 @@ extension ViewController: AVCaptureFileOutputRecordingDelegate {
         // Enable the Record button to let the user stop recording.
         DispatchQueue.main.async {
             self.capture.isEnabled = true
+            self.timeLapsed.text = "Starting recording"
             self.capture.setImage(#imageLiteral(resourceName: "Capture"), for: [])
         }
     }

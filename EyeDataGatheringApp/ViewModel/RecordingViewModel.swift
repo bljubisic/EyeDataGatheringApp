@@ -141,6 +141,15 @@ extension RecordingViewModel: RecordingInputs {
         self.connection = self.connectToTimer()
     }
     
+    func stopRecording() {
+        self.labelUpdateSubscription?.dispose()
+        self.firstFlashStop?.dispose()
+        self.secondFlashStart?.dispose()
+        self.secondFlashStop?.dispose()
+        self.connection?.dispose()
+        self.recordingSubject.onNext(false)
+    }
+    
     var inputs: RecordingInputs {
         return self
     }
